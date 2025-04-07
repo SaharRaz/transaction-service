@@ -1,0 +1,44 @@
+
+
+version: "3.8"
+
+services:
+  mongodb-transaction:
+    image: mongo:6.0
+    container_name: mongodb-transaction
+    ports:
+      - "27018:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+    volumes:
+      - /host_mnt/c/Users/Sahar/WebstormProjects/DigitalWallet/transaction-data:/data/db
+    networks:
+      - digital_wallet_network
+
+
+#   Transaction Service
+  transaction_service_server:
+    container_name: transaction_service_server
+    build:
+      context: .
+      dockerfile: src/Dockerfile
+    ports:
+      - "5002:5002"
+    environment:
+      PORT: 5002
+      MONGO_URI: mongodb://root:root@mongodb-transaction:27017/transactionDb?authSource=admin
+    depends_on:
+      - mongodb-transaction
+    volumes:
+      - ./transactions:/usr/src/app
+    networks:
+      - digital_wallet_network
+
+
+# Define a shared network for communication
+networks:
+  digital_wallet_network:
+    driver: bridge
+
+
