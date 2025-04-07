@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import logger from '../systems/logger.js';
 
 const connectDB = async () => {
-    const mongoURI = process.env.MONGO_URI || 'mongodb://root:root@mongodb-user:27017/userDb?authSource=admin';
+    const mongoURI = process.env.MONGO_URI || 'mongodb://root:root@mongodb-transaction:27017/transactionDb?authSource=admin';
 
     try {
         await mongoose.connect(mongoURI, {

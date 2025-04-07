@@ -12,7 +12,7 @@ services:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: root
     volumes:
-      - /host_mnt/c/Users/Sahar/WebstormProjects/DigitalWallet/transaction-data:/data/db
+      - /host_mnt/c/Users/Sahar/WebstormProjects/transaction-service/transaction-data:/data/db
     networks:
       - digital_wallet_network
 
