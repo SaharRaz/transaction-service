@@ -1,18 +1,54 @@
 import Transaction from '../model/transaction.model.js';
+import axios from 'axios';
+
+
+const { NOTIFICATION_SERVICE_URL } = process.env;
 
 const transactionsController = {
-    // Create a new transaction
     async createTransaction(data) {
+        const transaction = new Transaction(data);
+        const saved = await transaction.save();
+        console.log('🔗 Notification URL:', NOTIFICATION_SERVICE_URL);
+        console.log('🔗 Notification URL:', process.env.NOTIFICATION_SERVICE_URL);
+        // Notify users
         try {
-            const transaction = new Transaction(data);
-            const savedTransaction = await transaction.save();
-            console.info('Transaction created successfully', { id: savedTransaction._id });
-            return savedTransaction;
+            await axios.post(process.env.NOTIFICATION_SERVICE_URL, {
+                userId: saved.sender,
+                message: `💸 You sent ${saved.amount} to user ${saved.receiver}`
+            }, {
+                headers: { 'x-source-service': 'transaction-service' }
+            });
+
+            await axios.post(process.env.NOTIFICATION_SERVICE_URL, {
+                userId: saved.receiver,
+                message: `💰 You received ${saved.amount} from user ${saved.sender}`
+            }, {
+                headers: { 'x-source-service': 'transaction-service' }
+            });
         } catch (err) {
-            console.error('Error creating transaction', { error: err.message });
-            throw err;
+            console.error('[Notification Service] Failed:', err.message);
         }
+
+        return saved;
     },
+// };
+
+
+
+
+// const transactionsController = {
+//     // Create a new transaction
+//     async createTransaction(data) {
+//         try {
+//             const transaction = new Transaction(data);
+//             const savedTransaction = await transaction.save();
+//             console.info('Transaction created successfully', { id: savedTransaction._id });
+//             return savedTransaction;
+//         } catch (err) {
+//             console.error('Error creating transaction', { error: err.message });
+//             throw err;
+//         }
+//     },
 
     // Retrieve all transactions
     async getAllTransactions() {

@@ -2,7 +2,10 @@ import express from 'express';
 import connectDB from './db/dbConnection.js';
 import transactionsRoutes from './routes/transaction.routes.js';
 import logger from './systems/logger.js';
+import dotenv from 'dotenv';
 
+
+dotenv.config();
 // Initialize MongoDB Connection
 const initializeDatabase = async () => {
     try {
