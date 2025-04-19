@@ -1,8 +1,10 @@
 import Transaction from '../model/transaction.model.js';
+import { transactionStatusMap } from '../model/transaction.map.js';
 import axios from 'axios';
+import mongoose from 'mongoose';
 
 
-const { NOTIFICATION_SERVICE_URL } = process.env;
+const { NOTIFICATION_SERVICE_URL } = process.env ;
 
 const transactionsController = {
     async createTransaction(data) {
@@ -36,47 +38,25 @@ const transactionsController = {
 
 
 
-// const transactionsController = {
-//     // Create a new transaction
-//     async createTransaction(data) {
-//         try {
-//             const transaction = new Transaction(data);
-//             const savedTransaction = await transaction.save();
-//             console.info('Transaction created successfully', { id: savedTransaction._id });
-//             return savedTransaction;
-//         } catch (err) {
-//             console.error('Error creating transaction', { error: err.message });
-//             throw err;
-//         }
-//     },
+
 
     // Retrieve all transactions
     async getAllTransactions() {
         try {
             const transactions = await Transaction.find();
+            const enriched = transactions.map(trx => ({
+                ...trx.toObject(),
+                statusMeta: transactionStatusMap[trx.status] || {}
+            }));
+
             console.info('Fetched all transactions');
-            return transactions;
+            return enriched;
         } catch (err) {
             console.error('Error fetching transactions', { error: err.message });
             throw err;
         }
     },
 
-    // Retrieve transaction history by user ID
-    async getTransactionsByUserId(userId) {
-        try {
-            const transactions = await Transaction.find({ userId });
-            if (!transactions || transactions.length === 0) {
-                console.warn('No transactions found for user', { userId });
-                return [];
-            }
-            console.info('Fetched transactions for user', { userId });
-            return transactions;
-        } catch (err) {
-            console.error('Error fetching transactions by user ID', { error: err.message });
-            throw err;
-        }
-    },
 
     // Get a transaction by ID
     async getTransactionById(transactionId) {
@@ -93,6 +73,24 @@ const transactionsController = {
             throw err;
         }
     },
+
+    async getTransactionsByUserId(userId) {
+        try {
+            const objectId = new mongoose.Types.ObjectId(userId);
+            const transactions = await Transaction.find({ sender: objectId }); // filter by sender
+            const enriched = transactions.map(trx => ({
+                ...trx.toObject(),
+                statusMeta: transactionStatusMap[trx.status] || {}
+            }));
+
+            console.info('Fetched transactions for user (sender)', { userId });
+            return enriched;
+        } catch (err) {
+            console.error('Error fetching transactions by user ID', { error: err.message });
+            throw err;
+        }
+    },
+
 
     // Update a transaction by ID
     async updateTransaction(transactionId, updateData) {

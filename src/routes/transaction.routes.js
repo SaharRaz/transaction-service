@@ -36,6 +36,16 @@ router.get('/:id', async (req, res) => {
     }
 });
 
+router.get('/user/:userId', async (req, res) => {
+    try {
+        const transactions = await transactionsController.getTransactionsByUserId(req.params.userId);
+        res.status(200).json(transactions);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+
 // Update transaction
 router.put('/:id', validateSchema(updateTransactionSchema), async (req, res) => {
     try {
